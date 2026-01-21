@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="icon.png">
-    <title>PIXEL VAULT</title>
+    <title>PIXEL VAULT | LOCKED</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,8 +12,6 @@
             --border-color: #000000;
             --text-main: #000000;
             --input-bg: #ffffff;
-            --btn-hover: #000000;
-            --btn-text-hover: #ffffff;
         }
 
         * { box-sizing: border-box; }
@@ -30,17 +27,61 @@
             color: var(--text-main);
         }
 
-        .container {
+        .pixel-box {
             background-color: var(--card-bg);
             border: 4px solid var(--border-color);
             box-shadow: 10px 10px 0px #000;
-            width: 100%;
-            max-width: 450px;
             padding: 24px;
             position: relative;
+            width: 100%;
         }
 
-        /* 顶部工具栏 */
+        /* === 锁定屏幕 === */
+        #lock-screen {
+            max-width: 300px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #lock-msg {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .pin-input {
+            width: 100%;
+            padding: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 20px;
+            text-align: center;
+            border: 2px solid #000;
+            outline: none;
+            letter-spacing: 5px;
+        }
+
+        .btn-unlock {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            padding: 12px;
+            background: #000;
+            color: #fff;
+            border: 2px solid #000;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .btn-unlock:hover { background: #333; }
+
+        /* === 主程序 === */
+        #app-container {
+            max-width: 450px;
+            display: none; 
+        }
+
         .header {
             text-align: center;
             border-bottom: 4px solid var(--border-color);
@@ -63,7 +104,6 @@
             margin-bottom: 5px;
         }
 
-        /* 小工具按钮 */
         .btn-tool {
             font-family: 'VT323', monospace;
             font-size: 16px;
@@ -78,20 +118,38 @@
         .btn-tool:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px #000; }
         .btn-tool:hover { background: #000; color: #fff; }
 
-        /* 搜索框 */
-        .search-box {
+        /* === 修改：新的搜索栏容器样式 === */
+        .search-wrapper {
+            display: flex;
+            align-items: center;
             width: 100%;
             margin-bottom: 15px;
-            padding: 8px;
             border: 2px solid #000;
-            background: #ddd;
+            background: #ddd; /* 灰色背景 */
+            padding: 0 10px;
+        }
+
+        .search-icon {
+            width: 20px;
+            height: 20px;
+            display: block;
+            image-rendering: pixelated; /* 确保SVG不模糊 */
+            opacity: 0.6;
+        }
+
+        .search-box-clean {
+            width: 100%;
+            border: none;       /* 去掉自带边框 */
+            background: transparent; /* 透明背景 */
+            padding: 10px;
             font-family: 'VT323', monospace;
             font-size: 18px;
             text-transform: uppercase;
+            outline: none;
         }
-        .search-box::placeholder { color: #777; }
+        .search-box-clean::placeholder { color: #777; }
+        /* === 修改结束 === */
 
-        /* 输入区域 */
         .input-group {
             display: flex;
             flex-direction: column;
@@ -104,7 +162,7 @@
 
         .pass-row { display: flex; gap: 5px; }
         
-        input {
+        input.main-input {
             width: 100%;
             padding: 10px;
             font-family: 'VT323', monospace;
@@ -113,9 +171,9 @@
             background: var(--input-bg);
             outline: none;
         }
-        input:focus { background: #f9f9f9; box-shadow: inset 2px 2px 0px #ddd; }
+        input.main-input:focus { background: #f9f9f9; box-shadow: inset 2px 2px 0px #ddd; }
 
-        /* --- 图片按钮样式 --- */
+        /* 图片按钮样式 */
         .btn-gen {
             width: 48px;
             padding: 0;
@@ -128,23 +186,16 @@
             transition: background 0.1s;
             overflow: hidden;
         }
-
         .btn-gen img {
-            width: 24px; 
+            width: 24px;
             height: 24px;
             image-rendering: pixelated; 
             display: block;
-            filter: invert(100%); /* 默认白色图标 */
+            filter: invert(100%); 
             transition: filter 0.1s;
         }
-
-        .btn-gen:hover { 
-            background: #fff; 
-        }
-        .btn-gen:hover img { 
-            filter: invert(0%); /* 悬停变黑图标 */
-        }
-        /* --- 结束 --- */
+        .btn-gen:hover { background: #fff; }
+        .btn-gen:hover img { filter: invert(0%); }
 
         button.add-btn {
             font-family: 'Press Start 2P', cursive;
@@ -160,7 +211,6 @@
         button.add-btn:hover { background-color: #333; }
         button.add-btn:active { transform: translateY(2px); }
 
-        /* 列表区域 */
         #pass-list {
             list-style: none;
             padding: 0;
@@ -206,23 +256,33 @@
 </head>
 <body>
 
-    <div class="container">
+    <div id="lock-screen" class="pixel-box">
+        <div id="lock-icon" style="font-size: 40px;">🔒</div>
+        <div id="lock-msg">SYSTEM LOCKED</div>
+        <input type="password" id="pinInput" class="pin-input" maxlength="8" placeholder="****">
+        <button class="btn-unlock" onclick="attemptUnlock()">ENTER</button>
+    </div>
+
+    <div id="app-container" class="pixel-box">
         <div class="header">
             <h1>PIXEL VAULT</h1>
             <div class="tools-row">
                 <button class="btn-tool" onclick="exportData()">EXPORT JSON</button>
                 <button class="btn-tool" onclick="triggerImport()">IMPORT JSON</button>
                 <input type="file" id="fileInput" accept=".json" onchange="importData(this)">
+                <button class="btn-tool" onclick="resetPin()">RESET PIN</button>
             </div>
         </div>
 
-        <input type="text" id="searchInput" class="search-box" placeholder="[🔍 SEARCH SERVICE...]" onkeyup="filterList()">
-        
+        <div class="search-wrapper">
+            <img src="search.svg" alt="Search" class="search-icon">
+            <input type="text" id="searchInput" class="search-box-clean" placeholder="SEARCH SERVICE..." onkeyup="filterList()">
+        </div>
         <div class="input-group">
-            <input type="text" id="serviceInput" placeholder="SERVICE NAME">
-            <input type="text" id="userInput" placeholder="USERNAME">
+            <input type="text" id="serviceInput" class="main-input" placeholder="SERVICE NAME">
+            <input type="text" id="userInput" class="main-input" placeholder="USERNAME">
             <div class="pass-row">
-                <input type="text" id="passInput" placeholder="PASSWORD">
+                <input type="text" id="passInput" class="main-input" placeholder="PASSWORD">
                 <button class="btn-gen" onclick="generatePass()" title="Generate Random Password">
                     <img src="randomicons.png" alt="RNG">
                 </button>
@@ -235,9 +295,78 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', loadPasswords);
-
         const STORAGE_KEY = 'pixelVaultData_v2';
+        const PIN_KEY = 'pixelVault_PIN_CODE';
+        
+        document.addEventListener('DOMContentLoaded', initLockScreen);
+
+        function initLockScreen() {
+            const savedPin = localStorage.getItem(PIN_KEY);
+            const lockMsg = document.getElementById('lock-msg');
+            const pinInput = document.getElementById('pinInput');
+
+            if (!savedPin) {
+                lockMsg.innerText = "SET NEW PIN";
+                pinInput.placeholder = "NEW PIN";
+                document.title = "PIXEL VAULT | SETUP";
+            } else {
+                lockMsg.innerText = "SYSTEM LOCKED";
+                pinInput.placeholder = "****";
+                document.title = "PIXEL VAULT | LOCKED";
+            }
+
+            pinInput.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    attemptUnlock();
+                }
+            });
+            pinInput.focus();
+        }
+
+        function attemptUnlock() {
+            const inputVal = document.getElementById('pinInput').value;
+            const savedPin = localStorage.getItem(PIN_KEY);
+            const lockMsg = document.getElementById('lock-msg');
+
+            if (!inputVal) return;
+
+            if (!savedPin) {
+                if (inputVal.length < 4) {
+                    alert("PIN TOO SHORT (MIN 4 CHARS)");
+                    return;
+                }
+                localStorage.setItem(PIN_KEY, inputVal);
+                alert("PIN SET SUCCESSFULLY!");
+                unlockApp();
+            } else {
+                if (inputVal === savedPin) {
+                    unlockApp();
+                } else {
+                    document.getElementById('pinInput').value = '';
+                    lockMsg.innerText = "ACCESS DENIED";
+                    lockMsg.style.color = "#d00";
+                    setTimeout(() => {
+                        lockMsg.innerText = "SYSTEM LOCKED";
+                        lockMsg.style.color = "#000";
+                    }, 1500);
+                }
+            }
+        }
+
+        function unlockApp() {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+            document.title = "PIXEL VAULT";
+            loadPasswords();
+        }
+
+        function resetPin() {
+            if(confirm("RESET PIN CODE? (Data will remain safe)")) {
+                localStorage.removeItem(PIN_KEY);
+                alert("PIN REMOVED. REFRESH TO SET NEW PIN.");
+                location.reload();
+            }
+        }
 
         function getStorage() {
             const data = localStorage.getItem(STORAGE_KEY);
@@ -282,7 +411,7 @@
             renderList(filtered);
         }
 
-        // 14位，仅包含大小写，数字和特殊符号@
+        // 14位，仅大小写+数字+@
         function generatePass() {
             const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@";
             let pass = "";
