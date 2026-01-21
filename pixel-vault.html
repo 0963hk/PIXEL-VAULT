@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="icon.png">
+    <title>PIXEL VAULT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #f0f0f0;
+            --border-color: #000000;
+            --text-main: #000000;
+            --input-bg: #ffffff;
+            --btn-hover: #000000;
+            --btn-text-hover: #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'VT323', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border: 4px solid var(--border-color);
+            box-shadow: 10px 10px 0px #000;
+            width: 100%;
+            max-width: 450px;
+            padding: 24px;
+            position: relative;
+        }
+
+        /* 顶部工具栏 */
+        .header {
+            text-align: center;
+            border-bottom: 4px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 20px;
+            margin: 0 0 15px 0;
+            line-height: 1.4;
+            text-transform: uppercase;
+        }
+
+        .tools-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        /* 小工具按钮 */
+        .btn-tool {
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            background: #fff;
+            border: 2px solid var(--border-color);
+            padding: 4px 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 2px 2px 0px #000;
+            transition: all 0.1s;
+        }
+        .btn-tool:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px #000; }
+        .btn-tool:hover { background: #000; color: #fff; }
+
+        /* 搜索框 */
+        .search-box {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 8px;
+            border: 2px solid #000;
+            background: #ddd;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+        .search-box::placeholder { color: #777; }
+
+        /* 输入区域 */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 2px dashed #999;
+            background: #fff;
+        }
+
+        .pass-row { display: flex; gap: 5px; }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            border: 2px solid var(--border-color);
+            background: var(--input-bg);
+            outline: none;
+        }
+        input:focus { background: #f9f9f9; box-shadow: inset 2px 2px 0px #ddd; }
+
+        /* --- 图片按钮样式 --- */
+        .btn-gen {
+            width: 48px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            border: 2px solid #000;
+            cursor: pointer;
+            transition: background 0.1s;
+            overflow: hidden;
+        }
+
+        .btn-gen img {
+            width: 24px; 
+            height: 24px;
+            image-rendering: pixelated; 
+            display: block;
+            filter: invert(100%); /* 默认白色图标 */
+            transition: filter 0.1s;
+        }
+
+        .btn-gen:hover { 
+            background: #fff; 
+        }
+        .btn-gen:hover img { 
+            filter: invert(0%); /* 悬停变黑图标 */
+        }
+        /* --- 结束 --- */
+
+        button.add-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            padding: 12px;
+            background-color: #000;
+            color: #fff;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            margin-top: 5px;
+            transition: transform 0.1s;
+        }
+        button.add-btn:hover { background-color: #333; }
+        button.add-btn:active { transform: translateY(2px); }
+
+        /* 列表区域 */
+        #pass-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 280px;
+            overflow-y: auto;
+            border-top: 2px solid #000;
+        }
+        #pass-list::-webkit-scrollbar { width: 10px; }
+        #pass-list::-webkit-scrollbar-track { background: #ccc; border-left: 2px solid #000; }
+        #pass-list::-webkit-scrollbar-thumb { background: #000; }
+
+        .item {
+            background: #fff;
+            border-bottom: 2px solid var(--border-color);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .item:last-child { border-bottom: none; }
+        .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .service-name { font-weight: bold; font-size: 22px; text-transform: uppercase; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; font-size: 18px; margin: 2px 0; color: #444; }
+        .hidden-pass { font-family: sans-serif; letter-spacing: 2px; font-weight: bold; color: #000; }
+        
+        .action-group button {
+            border: 1px solid black;
+            background: #fff;
+            cursor: pointer;
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            padding: 2px 6px;
+            margin-left: 5px;
+            box-shadow: 2px 2px 0px #000;
+            transition: all 0.1s;
+        }
+        .action-group button:hover { background: #000; color: #fff; }
+        .action-group button:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px #000; }
+        
+        #fileInput { display: none; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>PIXEL VAULT</h1>
+            <div class="tools-row">
+                <button class="btn-tool" onclick="exportData()">EXPORT JSON</button>
+                <button class="btn-tool" onclick="triggerImport()">IMPORT JSON</button>
+                <input type="file" id="fileInput" accept=".json" onchange="importData(this)">
+            </div>
+        </div>
+
+        <input type="text" id="searchInput" class="search-box" placeholder="[🔍 SEARCH SERVICE...]" onkeyup="filterList()">
+        
+        <div class="input-group">
+            <input type="text" id="serviceInput" placeholder="SERVICE NAME">
+            <input type="text" id="userInput" placeholder="USERNAME">
+            <div class="pass-row">
+                <input type="text" id="passInput" placeholder="PASSWORD">
+                <button class="btn-gen" onclick="generatePass()" title="Generate Random Password">
+                    <img src="randomicons.png" alt="RNG">
+                </button>
+            </div>
+            <button class="add-btn" onclick="addPassword()">+ SAVE ENTRY</button>
+        </div>
+
+        <ul id="pass-list">
+            </ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', loadPasswords);
+
+        const STORAGE_KEY = 'pixelVaultData_v2';
+
+        function getStorage() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveStorage(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function addPassword() {
+            const service = document.getElementById('serviceInput').value;
+            const user = document.getElementById('userInput').value;
+            const pass = document.getElementById('passInput').value;
+
+            if (!service || !pass) {
+                alert("MISSING SERVICE OR PASSWORD");
+                return;
+            }
+
+            const data = getStorage();
+            data.unshift({
+                id: Date.now(),
+                service: service,
+                user: user,
+                pass: pass
+            });
+
+            saveStorage(data);
+            renderList(data);
+            clearInputs();
+        }
+
+        function filterList() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const data = getStorage();
+            if (!query) { renderList(data); return; }
+            const filtered = data.filter(item => 
+                item.service.toLowerCase().includes(query) || 
+                item.user.toLowerCase().includes(query)
+            );
+            renderList(filtered);
+        }
+
+        // 14位，仅包含大小写，数字和特殊符号@
+        function generatePass() {
+            const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@";
+            let pass = "";
+            for (let i = 0; i < 14; i++) {
+                pass += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('passInput').value = pass;
+        }
+
+        function exportData() {
+            const data = getStorage();
+            if (data.length === 0) return alert("NO DATA.");
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `pixel_vault_backup_${Date.now()}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function triggerImport() {
+            document.getElementById('fileInput').click();
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (!Array.isArray(importedData)) throw new Error("Invalid Format");
+                    if(confirm(`FOUND ${importedData.length} ITEMS. OVERWRITE CURRENT DATA?`)) {
+                        saveStorage(importedData);
+                        renderList(importedData);
+                        alert("IMPORT SUCCESSFUL!");
+                    }
+                } catch (err) { alert("ERROR: INVALID JSON FILE"); }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        function deleteItem(id) {
+            if(confirm("DELETE ITEM?")) {
+                let data = getStorage();
+                data = data.filter(item => item.id !== id);
+                saveStorage(data);
+                filterList(); 
+            }
+        }
+
+        function clearInputs() {
+            document.getElementById('serviceInput').value = '';
+            document.getElementById('userInput').value = '';
+            document.getElementById('passInput').value = '';
+            document.getElementById('searchInput').value = '';
+        }
+
+        function copyPass(pass) {
+            navigator.clipboard.writeText(pass);
+             const activeElement = document.activeElement;
+             const originalText = activeElement.innerText;
+             activeElement.innerText = "OK";
+             setTimeout(() => activeElement.innerText = originalText, 500);
+        }
+
+        function toggleVisibility(id) {
+            const passEl = document.getElementById(`pass-${id}`);
+            const btn = document.getElementById(`btn-eye-${id}`);
+            if (passEl.dataset.hidden === "true") {
+                passEl.innerText = passEl.dataset.real;
+                passEl.dataset.hidden = "false";
+                passEl.classList.remove('hidden-pass');
+                btn.innerText = "HIDE";
+            } else {
+                passEl.innerText = "*******";
+                passEl.dataset.hidden = "true";
+                passEl.classList.add('hidden-pass');
+                btn.innerText = "SHOW";
+            }
+        }
+
+        function renderList(data) {
+            const list = document.getElementById('pass-list');
+            list.innerHTML = '';
+            if (data.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:20px; color:#777;">[ NO DATA ]</div>';
+                return;
+            }
+            data.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'item';
+                li.innerHTML = `
+                    <div class="item-header">
+                        <span class="service-name">${item.service}</span>
+                        <div class="action-group">
+                            <button onclick="deleteItem(${item.id})">DEL</button>
+                        </div>
+                    </div>
+                    <div class="item-row">
+                        <span>User: ${item.user || '-'}</span>
+                    </div>
+                    <div class="item-row">
+                        <span id="pass-${item.id}" class="hidden-pass" data-hidden="true" data-real="${item.pass}">*******</span>
+                        <div class="action-group">
+                            <button id="btn-eye-${item.id}" onclick="toggleVisibility(${item.id})">SHOW</button>
+                            <button onclick="copyPass('${item.pass}')">COPY</button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function loadPasswords() {
+            renderList(getStorage());
+        }
+    </script>
+</body>
+</html>
